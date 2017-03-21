@@ -1,15 +1,30 @@
-inherit python-distutils
+inherit python-wheel
 
 NAME="python-urllib3"
-VERSION=1.10.4
+VERSION=1.20
 RELEASE=1
 CATEGORY="Python"
-SUMMARY="Python HTTP/HTTPS library"
+SUMMARY="Python3 HTTP/HTTPS library"
 DESCRIPTION="HTTP library for Python with thread-safe connection pooling,
 file post, and more."
 
-PATCH_URI="1.10.4-unbundle-deps.patch"
-
 ARCH=noarch
 
-REQUIRES="ca-certificates"
+python2_urllib3_REQUIRES="python2-backports.ssl_match_hostname"
+
+CYGPORT_USE_UNSTABLE_API=1
+src_unpack_hook() {
+	rm urllib3/contrib/[^p]*.py
+	rm urllib3/packages/ordered_dict.py
+	rm urllib3/packages/ssl_match_hostname/_implementation.py
+}
+
+src_install() {
+	cd ${B}
+	python_wheel_install
+
+	rm -f  ${D}${PYTHON2_SITELIB}/urllib3/packages/six.py
+	ln -s ${PYTHON2_SITELIB}/six.py ${D}${PYTHON2_SITELIB}/urllib3/packages/
+	rm -f  ${D}${PYTHON3_SITELIB}/urllib3/packages/six.py
+	ln -s ${PYTHON3_SITELIB}/six.py ${D}${PYTHON3_SITELIB}/urllib3/packages/
+}
