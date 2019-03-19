@@ -1,7 +1,7 @@
 inherit python-wheel
 
 NAME="python-urllib3"
-VERSION=1.20
+VERSION=1.24.1
 RELEASE=1
 CATEGORY="Python"
 SUMMARY="Python3 HTTP/HTTPS library"
@@ -10,21 +10,18 @@ file post, and more."
 
 ARCH=noarch
 
-python2_urllib3_REQUIRES="python2-backports.ssl_match_hostname"
+REQUIRES_EXCLUDE_FROM="*/urllib3/contrib/*"
 
-CYGPORT_USE_UNSTABLE_API=1
-src_unpack_hook() {
-	rm urllib3/contrib/[^p]*.py
-	rm urllib3/packages/ordered_dict.py
-	rm urllib3/packages/ssl_match_hostname/_implementation.py
-}
+#python27_urllib3_REQUIRES="python2-backports.ssl_match_hostname"
 
 src_install() {
 	cd ${B}
 	python_wheel_install
 
-	rm -f  ${D}${PYTHON2_SITELIB}/urllib3/packages/six.py
-	ln -s ${PYTHON2_SITELIB}/six.py ${D}${PYTHON2_SITELIB}/urllib3/packages/
-	rm -f  ${D}${PYTHON3_SITELIB}/urllib3/packages/six.py
-	ln -s ${PYTHON3_SITELIB}/six.py ${D}${PYTHON3_SITELIB}/urllib3/packages/
+	pushd ${D}
+	for six in usr/lib/python*/site-packages/urllib3/packages/six.py
+	do
+		rm $six
+		ln -s /${six/urllib3\/packages\//} $six
+	done
 }
